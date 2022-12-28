@@ -6,7 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,13 +41,26 @@ public class FormServlet extends HttpServlet {
         List<String> answers = new ArrayList<>();
         for (int i = 0; i < questionsList.size(); i++) {
             answers.add(request.getParameter("question" + i));
-            System.out.println(request.getParameter("question" + i));
         }
+
+        saveAnswersToFile("d:/answers", answers);
+
         request.setAttribute("questionsList", questionsList);
         request.setAttribute("answers", answers);
         try {
             getServletContext().getRequestDispatcher("/result.jsp").forward(request, response);
         } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveAnswersToFile(String fileName, List<String> answers) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(" (dd.MM.yy hh-mm-ss)");
+        File file = new File(fileName + simpleDateFormat.format(System.currentTimeMillis())+".ser");
+        try (ObjectOutputStream fileOut = new ObjectOutputStream(new FileOutputStream(file))) {
+            file.createNewFile();
+            fileOut.writeObject(answers);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
